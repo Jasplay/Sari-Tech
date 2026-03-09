@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sari-Tech — Sari-Sari Store System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     LOGIN SCREEN
+     ============================================================ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Sari-Tech</div>
+    <div class="login-sub">Sari-Sari Store Management System</div>
+
+    <label class="login-label">Username</label>
+    <input class="login-input" id="loginUser" type="text" placeholder="admin" autocomplete="off">
+
+    <label class="login-label">Password</label>
+    <input class="login-input" id="loginPass" type="password" placeholder="••••••••">
+
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="loginErr">Invalid username or password.</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN APPLICATION
+     ============================================================ -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo-wrap">
+      <div class="logo">Sari-Tech</div>
+      <div class="logo-tag">Store System</div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-item active" onclick="navigate('dashboard')">
+        <span class="nav-icon">◈</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="navigate('products')">
+        <span class="nav-icon">⊞</span> Products
+      </div>
+      <div class="nav-item" onclick="navigate('inventory')">
+        <span class="nav-icon">◉</span> Inventory
+      </div>
+      <div class="nav-item" onclick="navigate('sales')">
+        <span class="nav-icon">⊕</span> Sales
+      </div>
+      <div class="nav-item" onclick="navigate('reports')">
+        <span class="nav-icon">≡</span> Reports
+      </div>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="logout-btn" onclick="logout()">
+        <span>⏻</span> Logout
+      </div>
+    </div>
+  </div><!-- /sidebar -->
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-subtitle" id="dashDate"></div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card" style="--accent-bar:var(--accent)">
+          <div class="stat-label">Today's Sales</div>
+          <div class="stat-value" id="dashTodaySales">₱0.00</div>
+          <div class="stat-meta" id="dashTodayCount">0 transactions</div>
+        </div>
+        <div class="stat-card" style="--accent-bar:var(--success)">
+          <div class="stat-label">Total Products</div>
+          <div class="stat-value" id="dashTotalProducts">0</div>
+          <div class="stat-meta">in catalog</div>
+        </div>
+        <div class="stat-card" style="--accent-bar:var(--warning)">
+          <div class="stat-label">Low Stock Items</div>
+          <div class="stat-value" id="dashLowStock">0</div>
+          <div class="stat-meta">need restocking</div>
+        </div>
+        <div class="stat-card" style="--accent-bar:var(--accent2)">
+          <div class="stat-label">Out of Stock</div>
+          <div class="stat-value" id="dashOutStock">0</div>
+          <div class="stat-meta">unavailable</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div class="card">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:16px;">Recent Transactions</div>
+          <div class="activity-list" id="dashRecentSales">
+            <div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center;">No transactions yet</div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:16px;">Low Stock Alert</div>
+          <div id="dashLowStockList">
+            <div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center;">All stocks are sufficient</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /dashboard -->
+
+    <!-- ── PRODUCTS ── -->
+    <div class="page" id="page-products">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Products</div>
+          <div class="page-subtitle">Manage your product catalog</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div class="search-bar">
+            <input type="text" id="productSearch" placeholder="Search products..." oninput="renderProducts()">
+          </div>
+          <button class="btn btn-primary" onclick="openProductModal()">+ Add Product</button>
+        </div>
+      </div>
+
+      <div class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Cost</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="productsTable"></tbody>
+        </table>
+      </div>
+    </div><!-- /products -->
+
+    <!-- ── INVENTORY ── -->
+    <div class="page" id="page-inventory">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Inventory</div>
+          <div class="page-subtitle">Monitor and update stock levels</div>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="inventorySearch" placeholder="Search..." oninput="renderInventory()">
+        </div>
+      </div>
+
+      <div id="inventoryLowWarn" class="warning-strip" style="display:none;">
+        ⚠ Some items are running low on stock. Please restock soon.
+      </div>
+
+      <div class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Current Stock</th>
+              <th>Low Stock Threshold</th>
+              <th>Status</th>
+              <th>Restock</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTable"></tbody>
+        </table>
+      </div>
+    </div><!-- /inventory -->
+
+    <!-- ── SALES ── -->
+    <div class="page" id="page-sales">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Sales</div>
+          <div class="page-subtitle">Record new transactions</div>
+        </div>
+        <button class="btn btn-primary" onclick="openSaleModal()">+ New Sale</button>
+      </div>
+
+      <div class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date &amp; Time</th>
+              <th>Receipt #</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Cash</th>
+              <th>Change</th>
+            </tr>
+          </thead>
+          <tbody id="salesTable"></tbody>
+        </table>
+      </div>
+    </div><!-- /sales -->
+
+    <!-- ── REPORTS ── -->
+    <div class="page" id="page-reports">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Reports</div>
+          <div class="page-subtitle">Sales and inventory analytics</div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <select class="form-select" id="reportPeriod" onchange="renderReports()" style="width:auto;padding:10px 14px;">
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="all" selected>All Time</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stat-grid" style="margin-bottom:28px;">
+        <div class="stat-card" style="--accent-bar:var(--accent)">
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-value" id="repRevenue">₱0.00</div>
+        </div>
+        <div class="stat-card" style="--accent-bar:var(--success)">
+          <div class="stat-label">Gross Profit</div>
+          <div class="stat-value" id="repProfit">₱0.00</div>
+        </div>
+        <div class="stat-card" style="--accent-bar:var(--warning)">
+          <div class="stat-label">Transactions</div>
+          <div class="stat-value" id="repTxns">0</div>
+        </div>
+        <div class="stat-card" style="--accent-bar:var(--accent2)">
+          <div class="stat-label">Items Sold</div>
+          <div class="stat-value" id="repItems">0</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card report-section">
+          <div class="report-section-title">Top Selling Products</div>
+          <table>
+            <thead><tr><th>Product</th><th>Qty Sold</th><th>Revenue</th></tr></thead>
+            <tbody id="repTopProducts"></tbody>
+          </table>
+        </div>
+        <div class="card report-section">
+          <div class="report-section-title">Sales by Category</div>
+          <table>
+            <thead><tr><th>Category</th><th>Revenue</th><th>Share</th></tr></thead>
+            <tbody id="repCategories"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card report-section">
+        <div class="report-section-title">Transaction History</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Receipt #</th><th>Items</th><th>Revenue</th><th>Profit</th></tr>
+            </thead>
+            <tbody id="repHistory"></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /reports -->
+
+  </main>
+</div><!-- /app -->
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+
+<!-- Add / Edit Product -->
+<div class="modal-bg" id="productModal">
+  <div class="modal">
+    <div class="modal-title" id="productModalTitle">Add Product</div>
+
+    <div class="form-row">
+      <label class="form-label">Product Name *</label>
+      <input class="form-input" id="pName" placeholder="e.g. Lucky Me Pancit Canton">
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-row">
+        <label class="form-label">Category *</label>
+        <select class="form-select" id="pCategory">
+          <option value="">Select...</option>
+          <option>Noodles &amp; Pasta</option>
+          <option>Canned Goods</option>
+          <option>Snacks</option>
+          <option>Beverages</option>
+          <option>Condiments</option>
+          <option>Personal Care</option>
+          <option>Household</option>
+          <option>Dairy</option>
+          <option>Rice &amp; Grains</option>
+          <option>Others</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Unit</label>
+        <input class="form-input" id="pUnit" placeholder="piece / pack / bottle">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+      <div class="form-row">
+        <label class="form-label">Selling Price (₱) *</label>
+        <input class="form-input" id="pPrice" type="number" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Cost Price (₱) *</label>
+        <input class="form-input" id="pCost" type="number" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Stock Quantity *</label>
+        <input class="form-input" id="pStock" type="number" min="0" placeholder="0">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Low Stock Threshold</label>
+      <input class="form-input" id="pThreshold" type="number" min="1" placeholder="5">
+    </div>
+
+    <input type="hidden" id="pEditId">
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('productModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Restock -->
+<div class="modal-bg" id="restockModal">
+  <div class="modal" style="width:360px;">
+    <div class="modal-title">Restock Product</div>
+
+    <div class="form-row">
+      <label class="form-label">Product</label>
+      <div id="restockProductName" style="font-size:15px;font-weight:500;color:var(--accent);padding:8px 0;"></div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Current Stock</label>
+      <div id="restockCurrent" style="font-size:15px;padding:4px 0;"></div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Add Quantity *</label>
+      <input class="form-input" id="restockQty" type="number" min="1" placeholder="10">
+    </div>
+
+    <input type="hidden" id="restockId">
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('restockModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="doRestock()">Restock</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Sale -->
+<div class="modal-bg" id="saleModal">
+  <div class="modal" style="width:560px;">
+    <div class="modal-title">New Sale Transaction</div>
+
+    <div id="saleItems"></div>
+    <button class="btn btn-ghost btn-sm" onclick="addSaleRow()" style="margin-bottom:20px;">+ Add Item</button>
+
+    <hr class="divider">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <span style="font-size:13px;color:var(--muted);">TOTAL AMOUNT</span>
+      <span style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--accent);" id="saleTotal">₱0.00</span>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Cash Received (₱)</label>
+      <input class="form-input" id="saleCash" type="number" min="0" step="0.01" placeholder="0.00" oninput="calcChange()">
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <span style="font-size:13px;color:var(--muted);">CHANGE</span>
+      <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:600;" id="saleChange">₱0.00</span>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('saleModal')">Cancel</button>
+      <button class="btn btn-success" onclick="completeSale()">✓ Complete Sale</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TOAST NOTIFICATION
+     ============================================================ -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
+<script src="app.js"></script>
+</body>
+</html>
