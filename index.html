@@ -2,39 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sari-Tech — Sari-Sari Store System</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ============================================================
-     LOGIN SCREEN
-     ============================================================ -->
-<div id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo">Sari-Tech</div>
-    <div class="login-sub">Sari-Sari Store Management System</div>
-
-    <label class="login-label">Username</label>
-    <input class="login-input" id="loginUser" type="text" placeholder="admin" autocomplete="off">
-
-    <label class="login-label">Password</label>
-    <input class="login-input" id="loginPass" type="password" placeholder="••••••••">
-
-    <button class="login-btn" onclick="doLogin()">Sign In</button>
-    <div class="login-err" id="loginErr">Invalid username or password.</div>
-  </div>
-</div>
-
-<!-- ============================================================
-     MAIN APPLICATION
-     ============================================================ -->
 <div id="app">
 
+  <!-- MOBILE TOP BAR -->
+  <div class="topbar">
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topbar-logo">Sari-Tech</div>
+    <div class="topbar-right" id="topbarPageTitle">Dashboard</div>
+  </div>
+
+  <!-- SIDEBAR OVERLAY (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
   <!-- SIDEBAR -->
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
     <div class="logo-wrap">
       <div class="logo">Sari-Tech</div>
       <div class="logo-tag">Store System</div>
@@ -58,17 +48,13 @@
       </div>
     </nav>
 
-    <div class="sidebar-bottom">
-      <div class="logout-btn" onclick="logout()">
-        <span>⏻</span> Logout
-      </div>
-    </div>
-  </div><!-- /sidebar -->
+    <div class="sidebar-bottom"></div>
+  </div>
 
   <!-- MAIN CONTENT -->
   <main class="main">
 
-    <!-- ── DASHBOARD ── -->
+    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="page-header">
         <div>
@@ -89,7 +75,7 @@
           <div class="stat-meta">in catalog</div>
         </div>
         <div class="stat-card" style="--accent-bar:var(--warning)">
-          <div class="stat-label">Low Stock Items</div>
+          <div class="stat-label">Low Stock</div>
           <div class="stat-value" id="dashLowStock">0</div>
           <div class="stat-meta">need restocking</div>
         </div>
@@ -100,38 +86,39 @@
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="dash-cards">
         <div class="card">
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:16px;">Recent Transactions</div>
+          <div class="card-title">Recent Transactions</div>
           <div class="activity-list" id="dashRecentSales">
-            <div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center;">No transactions yet</div>
+            <div class="empty-msg">No transactions yet</div>
           </div>
         </div>
         <div class="card">
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:16px;">Low Stock Alert</div>
+          <div class="card-title">Low Stock Alert</div>
           <div id="dashLowStockList">
-            <div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center;">All stocks are sufficient</div>
+            <div class="empty-msg">All stocks are sufficient</div>
           </div>
         </div>
       </div>
-    </div><!-- /dashboard -->
+    </div>
 
-    <!-- ── PRODUCTS ── -->
+    <!-- PRODUCTS -->
     <div class="page" id="page-products">
       <div class="page-header">
         <div>
           <div class="page-title">Products</div>
           <div class="page-subtitle">Manage your product catalog</div>
         </div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <div class="search-bar">
-            <input type="text" id="productSearch" placeholder="Search products..." oninput="renderProducts()">
-          </div>
-          <button class="btn btn-primary" onclick="openProductModal()">+ Add Product</button>
-        </div>
+        <button class="btn btn-primary btn-sm" onclick="openProductModal()">+ Add</button>
       </div>
 
-      <div class="card table-wrap">
+      <div class="search-bar" style="margin-bottom:16px;">
+        <input type="text" id="productSearch" placeholder="Search products..." oninput="renderProducts()">
+      </div>
+
+      <div id="productCards" class="product-cards"></div>
+
+      <div class="card table-wrap desktop-only">
         <table>
           <thead>
             <tr>
@@ -147,32 +134,35 @@
           <tbody id="productsTable"></tbody>
         </table>
       </div>
-    </div><!-- /products -->
+    </div>
 
-    <!-- ── INVENTORY ── -->
+    <!-- INVENTORY -->
     <div class="page" id="page-inventory">
       <div class="page-header">
         <div>
           <div class="page-title">Inventory</div>
           <div class="page-subtitle">Monitor and update stock levels</div>
         </div>
-        <div class="search-bar">
-          <input type="text" id="inventorySearch" placeholder="Search..." oninput="renderInventory()">
-        </div>
+      </div>
+
+      <div class="search-bar" style="margin-bottom:16px;">
+        <input type="text" id="inventorySearch" placeholder="Search..." oninput="renderInventory()">
       </div>
 
       <div id="inventoryLowWarn" class="warning-strip" style="display:none;">
         ⚠ Some items are running low on stock. Please restock soon.
       </div>
 
-      <div class="card table-wrap">
+      <div id="inventoryCards" class="product-cards"></div>
+
+      <div class="card table-wrap desktop-only">
         <table>
           <thead>
             <tr>
               <th>Product</th>
               <th>Category</th>
               <th>Current Stock</th>
-              <th>Low Stock Threshold</th>
+              <th>Threshold</th>
               <th>Status</th>
               <th>Restock</th>
             </tr>
@@ -180,19 +170,21 @@
           <tbody id="inventoryTable"></tbody>
         </table>
       </div>
-    </div><!-- /inventory -->
+    </div>
 
-    <!-- ── SALES ── -->
+    <!-- SALES -->
     <div class="page" id="page-sales">
       <div class="page-header">
         <div>
           <div class="page-title">Sales</div>
           <div class="page-subtitle">Record new transactions</div>
         </div>
-        <button class="btn btn-primary" onclick="openSaleModal()">+ New Sale</button>
+        <button class="btn btn-primary btn-sm" onclick="openSaleModal()">+ New Sale</button>
       </div>
 
-      <div class="card table-wrap">
+      <div id="salesCards" class="product-cards"></div>
+
+      <div class="card table-wrap desktop-only">
         <table>
           <thead>
             <tr>
@@ -207,23 +199,21 @@
           <tbody id="salesTable"></tbody>
         </table>
       </div>
-    </div><!-- /sales -->
+    </div>
 
-    <!-- ── REPORTS ── -->
+    <!-- REPORTS -->
     <div class="page" id="page-reports">
       <div class="page-header">
         <div>
           <div class="page-title">Reports</div>
           <div class="page-subtitle">Sales and inventory analytics</div>
         </div>
-        <div style="display:flex;gap:10px;">
-          <select class="form-select" id="reportPeriod" onchange="renderReports()" style="width:auto;padding:10px 14px;">
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="all" selected>All Time</option>
-          </select>
-        </div>
+        <select class="form-select period-select" id="reportPeriod" onchange="renderReports()">
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+          <option value="all" selected>All Time</option>
+        </select>
       </div>
 
       <div class="stat-grid" style="margin-bottom:28px;">
@@ -249,7 +239,7 @@
         <div class="card report-section">
           <div class="report-section-title">Top Selling Products</div>
           <table>
-            <thead><tr><th>Product</th><th>Qty Sold</th><th>Revenue</th></tr></thead>
+            <thead><tr><th>Product</th><th>Qty</th><th>Revenue</th></tr></thead>
             <tbody id="repTopProducts"></tbody>
           </table>
         </div>
@@ -267,22 +257,43 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Date</th><th>Receipt #</th><th>Items</th><th>Revenue</th><th>Profit</th></tr>
+              <tr><th>Date</th><th>Receipt</th><th>Items</th><th>Revenue</th><th>Profit</th></tr>
             </thead>
             <tbody id="repHistory"></tbody>
           </table>
         </div>
       </div>
-    </div><!-- /reports -->
+    </div>
 
   </main>
-</div><!-- /app -->
 
-<!-- ============================================================
-     MODALS
-     ============================================================ -->
+  <!-- BOTTOM NAV (mobile) -->
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="bottom-nav-item active" onclick="navigate('dashboard')" data-page="dashboard">
+      <span class="bnav-icon">◈</span>
+      <span class="bnav-label">Home</span>
+    </div>
+    <div class="bottom-nav-item" onclick="navigate('products')" data-page="products">
+      <span class="bnav-icon">⊞</span>
+      <span class="bnav-label">Products</span>
+    </div>
+    <div class="bottom-nav-item" onclick="navigate('inventory')" data-page="inventory">
+      <span class="bnav-icon">◉</span>
+      <span class="bnav-label">Inventory</span>
+    </div>
+    <div class="bottom-nav-item" onclick="navigate('sales')" data-page="sales">
+      <span class="bnav-icon">⊕</span>
+      <span class="bnav-label">Sales</span>
+    </div>
+    <div class="bottom-nav-item" onclick="navigate('reports')" data-page="reports">
+      <span class="bnav-icon">≡</span>
+      <span class="bnav-label">Reports</span>
+    </div>
+  </nav>
 
-<!-- Add / Edit Product -->
+</div>
+
+<!-- MODAL: Add / Edit Product -->
 <div class="modal-bg" id="productModal">
   <div class="modal">
     <div class="modal-title" id="productModalTitle">Add Product</div>
@@ -292,7 +303,7 @@
       <input class="form-input" id="pName" placeholder="e.g. Lucky Me Pancit Canton">
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="form-grid-2">
       <div class="form-row">
         <label class="form-label">Category *</label>
         <select class="form-select" id="pCategory">
@@ -315,7 +326,7 @@
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+    <div class="form-grid-3">
       <div class="form-row">
         <label class="form-label">Selling Price (₱) *</label>
         <input class="form-input" id="pPrice" type="number" min="0" step="0.01" placeholder="0.00">
@@ -325,7 +336,7 @@
         <input class="form-input" id="pCost" type="number" min="0" step="0.01" placeholder="0.00">
       </div>
       <div class="form-row">
-        <label class="form-label">Stock Quantity *</label>
+        <label class="form-label">Stock Qty *</label>
         <input class="form-input" id="pStock" type="number" min="0" placeholder="0">
       </div>
     </div>
@@ -344,14 +355,14 @@
   </div>
 </div>
 
-<!-- Restock -->
+<!-- MODAL: Restock -->
 <div class="modal-bg" id="restockModal">
-  <div class="modal" style="width:360px;">
+  <div class="modal modal-sm">
     <div class="modal-title">Restock Product</div>
 
     <div class="form-row">
       <label class="form-label">Product</label>
-      <div id="restockProductName" style="font-size:15px;font-weight:500;color:var(--accent);padding:8px 0;"></div>
+      <div id="restockProductName" class="restock-name"></div>
     </div>
     <div class="form-row">
       <label class="form-label">Current Stock</label>
@@ -371,9 +382,9 @@
   </div>
 </div>
 
-<!-- New Sale -->
+<!-- MODAL: New Sale -->
 <div class="modal-bg" id="saleModal">
-  <div class="modal" style="width:560px;">
+  <div class="modal modal-lg">
     <div class="modal-title">New Sale Transaction</div>
 
     <div id="saleItems"></div>
@@ -381,9 +392,9 @@
 
     <hr class="divider">
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <span style="font-size:13px;color:var(--muted);">TOTAL AMOUNT</span>
-      <span style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--accent);" id="saleTotal">₱0.00</span>
+    <div class="sale-total-row">
+      <span class="sale-total-label">TOTAL AMOUNT</span>
+      <span class="sale-total-value" id="saleTotal">₱0.00</span>
     </div>
 
     <div class="form-row">
@@ -391,9 +402,9 @@
       <input class="form-input" id="saleCash" type="number" min="0" step="0.01" placeholder="0.00" oninput="calcChange()">
     </div>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-      <span style="font-size:13px;color:var(--muted);">CHANGE</span>
-      <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:600;" id="saleChange">₱0.00</span>
+    <div class="sale-change-row">
+      <span class="sale-total-label">CHANGE</span>
+      <span class="sale-change-value" id="saleChange">₱0.00</span>
     </div>
 
     <div class="modal-actions">
@@ -403,14 +414,8 @@
   </div>
 </div>
 
-<!-- ============================================================
-     TOAST NOTIFICATION
-     ============================================================ -->
 <div class="toast" id="toast"></div>
 
-<!-- ============================================================
-     SCRIPTS
-     ============================================================ -->
 <script src="app.js"></script>
 </body>
 </html>
